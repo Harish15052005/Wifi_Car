@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<input type='text' id='ipInput' value="192.168.149.96">
+	<button onclick="changeIP()">Change Ip</button>
+	<br>
+	<br>
+	<button onclick="sendDir('f')">F</button>
+	<button onclick="sendDir('b')">B</button>
+	<button onclick="sendDir('l')">L</button>
+	<button onclick="sendDir('r')">R</button>
+	<button onclick="sendDir('s')">S</button>
+	<button onclick="sendDir('z')">GhomarLeft</button>
+	<button onclick="sendDir('x')">GhomarRight</button>
+
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<script type="text/javascript">
+	
+	let ip;
+
+
+	function changeIP()
+	{
+		ip = document.getElementById('ipInput').value;
+		console.log(`http://${ip}/data`);
+	}
+
+	function sendDir(dir)
+	{
+		var data = {
+			"direction" : dir
+		};
+
+		$.ajax({
+			url : `http://${ip}/data`,
+			method: "POST",
+			data : data,
+			error: (res)=>{
+				alert("Error Occured");
+			}
+		})
+	}
+
+
+</script>
+</body>
+</html>
