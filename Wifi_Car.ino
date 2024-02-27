@@ -1,9 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 
-const char* SSID = "nne";
-const char* pass = "1122334455";
+IPAddress apIP(192, 168, 1, 1);
+const char* apSSID = "ESP8266-Access-Point";
 
 const int m1a = D5;
 const int m1b = D6;
@@ -72,16 +71,42 @@ void stop()
   digitalWrite(m2b, LOW);
 }
 
-void handleData()
+void handleRoot()
 {
-  if (server.method() == HTTP_POST)
-  {
-    direction = server.arg("direction");
-    Serial.print("Direction from client :- ");
-    Serial.println(direction);
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.send(200, "text/html", "");
+}
 
-    if (direction == "f") {
+void setup()
+{
+
+
+  Serial.begin(115200);
+
+  // Set up ESP8266 in soft-AP mode
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP(apSSID);
+
+  Serial.println("Soft-AP IP address = " + WiFi.softAPIP().toString());
+
+
+  server.on("/", handleRoot);
+  server.begin();
+
+  pinMode(m1a, OUTPUT);
+  pinMode(m1b, OUTPUT);
+  pinMode(m2a, OUTPUT);
+  pinMode(m2b, OUTPUT);
+}
+
+void loop()
+{
+  server.handleClient();
+  direction = server.arg("direction");
+  Serial.println(direction);
+  if (direction == "f") {
       forward();
+      Serial.println("f");
     } else if (direction == "b") {
       reverse();
     } else if (direction == "l") {
@@ -97,50 +122,4 @@ void handleData()
     }
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200);
-  }
-  else
-  {
-    server.sendHeader("Access-Control-Allow-Origin", "*");
-    server.send(405, "text/plain", "method Not Allowed");
-  }
-}
-
-void setup()
-{
-
-  pinMode(m1a, OUTPUT);
-  pinMode(m1b, OUTPUT);
-  pinMode(m2a, OUTPUT);
-  pinMode(m2b, OUTPUT);
-
-  Serial.begin(115200);
-
-  delay(10);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, pass);
-  Serial.println();
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.println("...");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.print("Ip address:- ");
-  Serial.println(WiFi.localIP());
-
-  if (MDNS.begin("esp8266")) {
-      Serial.println("MDNS responder started");
-  }
-
-  server.on("/data", handleData);
-  server.begin();
-}
-
-void loop()
-{
-  server.handleClient();
-  MDNS.update();
 }
