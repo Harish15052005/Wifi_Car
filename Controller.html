@@ -6,10 +6,6 @@
 	<title></title>
 </head>
 <body>
-	<input type='text' id='ipInput' value="192.168.149.96">
-	<button onclick="changeIP()">Change Ip</button>
-	<br>
-	<br>
 	<button onclick="sendDir('f')">F</button>
 	<button onclick="sendDir('b')">B</button>
 	<button onclick="sendDir('l')">L</button>
@@ -20,15 +16,6 @@
 
 <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <script type="text/javascript">
-	
-	let ip;
-
-
-	function changeIP()
-	{
-		ip = document.getElementById('ipInput').value;
-		console.log(`http://${ip}/data`);
-	}
 
 	function sendDir(dir)
 	{
@@ -37,8 +24,8 @@
 		};
 
 		$.ajax({
-			url : `http://${ip}/data`,
-			method: "POST",
+			url : 'http://192.168.1.1/',
+			method: "GET",
 			data : data,
 			error: (res)=>{
 				alert("Error Occured");
