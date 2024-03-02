@@ -4,34 +4,235 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title></title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style type="text/css" media="screen">
+	*
+	{
+	    margin: 0;
+	    padding: 0;
+	    box-sizing: border-box;
+	}
+
+	.container
+	{
+		width: 100vw;
+		height: 100vh;
+		position: relative;
+		top: 0;
+		left: 0;
+	}
+	.FvdRevContainer{
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 50%;
+		height: 100%;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+	.LeftRightContainer{
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 50%;
+		height: 50%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.iconFBContainer
+	{
+		width: 100%;
+		height: 50%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 4rem;
+		background: gold;
+		border: 1px  solid black;
+	}
+	.iconFBContainer:active
+	{
+		opacity: 0.7;
+	}
+
+
+	.iconLRContainer
+	{
+		width: 50%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 4rem;
+		border: 1px  solid black;
+		background: deepskyblue;
+	}
+
+	.iconLRContainer:active {
+		opacity: 0.7;
+	}
+
+	.InformationContainer{
+		position: absolute;
+		width: 50%;
+		height: 50%;
+		top: 0;
+		left: 50%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.IPContainer{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+	}
+
+	.ContainerHeading
+	{
+		font-size: 1.0rem;
+		font-weight: bolder;
+		margin-top: 0.5rem;
+		margin-bottom: 0.2rem;
+	}
+	.IPTextContainer
+	{
+		font-size: 1rem;
+		font-weight: bolder;
+		margin: 0.2rem 0;
+	}
+	.IPInputContainer input
+	{
+		text-decoration: none;
+		font-size: 1rem;
+		border: 2px solid black ;
+		margin: 0.5rem 0;
+		padding: 0.2rem;
+		font-weight: bolder;
+		box-shadow: 1.5px 1.5px 1.5px black;
+	}
+
+	.IPInputContainer input:focus
+	{
+		border: 2px solid deepskyblue;
+	}
+	.IPChangeBtn
+	{
+		text-decoration: none;
+		border: none;
+		background: deepskyblue;
+		padding: 0.5rem;
+		font-size: 0.8rem;
+		border-radius: 10px;
+		font-weight: bolder;
+		box-shadow: 1.5px 1.5px 1.5px black;
+		cursor: pointer;
+		margin-top: .5rem;
+	}
+
+	.mainHeading
+	{
+		position: absolute;
+		top: 0;
+		left: 50%;
+		width: 50%;
+		height: 10%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 1.2rem;
+		font-weight: bolder;
+
+	}
+
+</style>
+
 </head>
 <body>
-	<button onclick="sendDir('f')">F</button>
-	<button onclick="sendDir('b')">B</button>
-	<button onclick="sendDir('l')">L</button>
-	<button onclick="sendDir('r')">R</button>
-	<button onclick="sendDir('s')">S</button>
-	<button onclick="sendDir('z')">GhomarLeft</button>
-	<button onclick="sendDir('x')">GhomarRight</button>
 
+	<div class="mainHeading">Wifi Robo Car Controller</div>
+
+	<div class="container">
+		
+		<div class="FvdRevContainer btnContainer">
+			<div class="iconFBContainer" id="forward" ontouchstart="sendDir('F')" onmousedown="sendDir('F')" onmouseup="sendDir('S')" ontouchend="sendDir('S')">
+				<i class="fa-solid fa-up-long"></i>
+			</div>
+			<div class="iconFBContainer" id="reverse" ontouchstart="sendDir('B')" onmousedown="sendDir('B')" onmouseup="sendDir('S')" ontouchend="sendDir('S')">
+				<i class="fa-solid fa-down-long"></i>
+			</div>
+		</div>
+
+		<div class="LeftRightContainer btnContainer">
+			<div class="iconLRContainer" id="left" ontouchstart="sendDir('L')" onmousedown="sendDir('L')" onmouseup="sendDir('S')" ontouchend="sendDir('S')">
+				<i class="fa-solid fa-left-long"></i></div>
+			<div class="iconLRContainer" id="right" ontouchstart="sendDir('R')" onmousedown="sendDir('R')" onmouseup="sendDir('S')" ontouchend="sendDir('S')">
+				<i class="fa-solid fa-right-long"></i></div>
+		</div>
+
+		<div class="InformationContainer">
+			<div class="IPContainer">
+				<div class="ContainerHeading">IP Address of Car</div>
+				<div class="IPTextContainer" id="IPTextContainer">192.168.1.1</div>
+				<div class="IPInputContainer">
+					<input type="text" name="ip" id="IPInput" value="192.168.1.1">
+				</div>
+				<button onclick="changeIP()" class="IPChangeBtn">Change IP Address</button>
+			</div>
+				
+		</div>
+
+	</div>
 <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <script type="text/javascript">
+
+	let ip = "192.168.1.1";
 
 	function sendDir(dir)
 	{
 		var data = {
-			"direction" : dir
+			"state" : dir
 		};
 
 		$.ajax({
-			url : 'http://192.168.1.1/',
+			url : `http://${ip}/`,
 			method: "GET",
 			data : data,
 			error: (res)=>{
-				alert("Error Occured");
+				console.log(res);
 			}
 		})
 	}
+
+	function changeIP()
+	{
+
+		ipdata = document.getElementById("IPInput").value;
+		if(ipdata=="" || ipdata == " ")
+		{
+			alert("please Enter the IP Address of Wifi Car");
+		}else {
+			{	
+				ip = ipdata;
+				document.getElementById("IPTextContainer").innerHTML = ip;
+			}
+		}
+		
+	}
+
+
 
 
 </script>
