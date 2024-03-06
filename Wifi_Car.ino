@@ -1,136 +1,146 @@
-#include <ESP8266WiFi.h> 
-#include <ESP8266WebServer.h> 
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 
-int m1a = D1;
-int m1b = D2;
-int m2a = D3;
-int m2b = D4;
+const char* SSID = "nne";
+const char* pass = "1122334455";
 
+const int m1a = D5;
+const int m1b = D6;
 
+const int m2a = D7;
+const int m2b = D8;
 
-String data;         
+ESP8266WebServer server(80);
 
-ESP8266WebServer server(80);      
+String direction;
 
-unsigned long previousMillis = 0;
+void forward()
+{
+  digitalWrite(m1a, HIGH);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2a, HIGH);
+  digitalWrite(m2b, LOW);
 
-String sta_ssid = "Wifi";      
-String sta_password = "11223344";  
+}
 
+void reverse()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m1b, HIGH);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m2b, HIGH);
 
-void HTTP_handleRoot(void){
-  server.send ( 200, "text/html", "Wifi Car!!!" );       
-  if( server.hasArg("State") ){
-     Serial.println(server.arg("State"));
+}
+
+void right()
+{
+  digitalWrite(m1a, HIGH);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m2b, LOW);
+}
+
+void ghomarLeft()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m1b, HIGH);
+  digitalWrite(m2a, HIGH);
+  digitalWrite(m2b, LOW);
+}
+
+void ghomarRight()
+{
+  digitalWrite(m1a, HIGH);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m2b, HIGH);
+}
+void left()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2a, HIGH);
+  digitalWrite(m2b, LOW);
+}
+
+void stop()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m2b, LOW);
+}
+
+void handleData()
+{
+  if (server.method() == HTTP_POST)
+  {
+    direction = server.arg("direction");
+    Serial.print("Direction from client :- ");
+    Serial.println(direction);
+
+    if (direction == "f") {
+      forward();
+    } else if (direction == "b") {
+      reverse();
+    } else if (direction == "l") {
+      left();
+    } else if (direction == "r") {
+      right();
+    } else if (direction == "s") {
+      stop();
+    } else if (direction == "z") {
+      ghomarLeft();
+    } else if (direction == "x") {
+      ghomarRight();
+    }
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200);
+  }
+  else
+  {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(405, "text/plain", "method Not Allowed");
   }
 }
 
-void setup(){
-  Serial.begin(115200);    
-  Serial.println();
- 
-    
+void setup()
+{
+
   pinMode(m1a, OUTPUT);
   pinMode(m1b, OUTPUT);
   pinMode(m2a, OUTPUT);
   pinMode(m2b, OUTPUT);
-  
-  digitalWrite(m2a, LOW);
-  digitalWrite(m2b, LOW);
-  analogWrite(m1a, 0);
-  analogWrite(m1b, 0);
 
+  Serial.begin(115200);
+
+  delay(10);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
-  Serial.println("");
-  Serial.print("Connecting to: ");
-  Serial.println(sta_ssid);
+  WiFi.begin(SSID, pass);
+  Serial.println();
 
-  unsigned long currentMillis = millis();
-  previousMillis = currentMillis;
-  while (WiFi.status() != WL_CONNECTED && currentMillis - previousMillis <= 10000) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
-    Serial.print(".");
-    currentMillis = millis();
+    Serial.println("...");
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("");
-    Serial.println("*WiFi-STA-Mode*");
-    Serial.print("IP: ");
-    Serial.println(WiFi.localIP());
-    delay(3000);
-  } else {
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP("Wifi Car");
-    IPAddress myIP = WiFi.softAPIP();
-    Serial.println("");
-    Serial.println("WiFi failed connected to " + sta_ssid);
-    Serial.println("");
-    Serial.println("*WiFi-AP-Mode*");
-    Serial.print("AP IP address: ");
-    Serial.println(myIP);
-    delay(3000);
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.print("Ip address:- ");
+  Serial.println(WiFi.localIP());
+
+  if (MDNS.begin("esp8266")) {
+      Serial.println("MDNS responder started");
   }
 
-  
- 
-
-  server.on ( "/", HTTP_handleRoot );       
-  server.onNotFound ( HTTP_handleRoot );    
-  server.begin();                           
+  server.on("/data", handleData);
+  server.begin();
 }
 
-void loop() {
-    server.handleClient();       
-    
-      data = server.arg("State");
-      if (data == "F") Forward();          
-      else if (data == "B") Backward();
-      else if (data == "R") TurnRight();
-      else if (data == "L") TurnLeft();
-      else if (data == "S") stop();
+void loop()
+{
+  server.handleClient();
+  MDNS.update();
 }
-
-
-void handleNotFound(){
-  server.send(404, "text/plain", "404: Not found"); 
-}
-
-void Forward(){ 
-  digitalWrite(m2a, HIGH);
-  digitalWrite(m2b, LOW);
-  digitalWrite(m1a, HIGH);
-  digitalWrite(m1b, LOW);
-}
-
-void Backward(){
-  digitalWrite(m2a, LOW);
-  digitalWrite(m2b, HIGH);
-  digitalWrite(m1a, LOW);
-  digitalWrite(m1b, HIGH);
-}
-
-void TurnLeft(){
-  digitalWrite(m2a, LOW);
-  digitalWrite(m2b, HIGH);
-  digitalWrite(m1a, HIGH);
-  digitalWrite(m1b, LOW);
-}
-
-void TurnRight(){
-  digitalWrite(m2a, HIGH);
-  digitalWrite(m2b, LOW);
-  digitalWrite(m1a, LOW);
-  digitalWrite(m1b, HIGH);
-}
-
-void stop()
-{  
-  digitalWrite(m2a, LOW);
-  digitalWrite(m2b, LOW);
-  digitalWrite(m1a, LOW);
-  digitalWrite(m1b, LOW);
-}
-
-
